@@ -16,6 +16,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Departments from "./pages/Departments";
 import SavedLaws from "./pages/SavedLaws";
+import MyComplaints from './pages/MyComplaints';
+// NEW IMPORT: Import the new page component
+import ComplaintGenerator from './pages/ComplaintGenerator';
 import Profile from "./pages/Profile";
 
 function App() {
@@ -36,7 +39,13 @@ function App() {
               <Route path="problem-solver" element={<ProblemSolver />} />
               <Route path="departments" element={<Departments />} />
               <Route path="dashboard" element={<Dashboard />} />
-                <Route path="saved-laws" element={<SavedLaws />} />
+              <Route path="saved-laws" element={<SavedLaws />} />
+              {/* COMPLAINTS: List View */}
+              <Route path="my-complaints" element={<MyComplaints />} /> 
+              {/* FIX: Dynamic Route for Complaint Details (to avoid 404 on /my-complaints/ID) */}
+              <Route path="my-complaints/:complaintId" element={<MyComplaints />} />
+              {/* NEW ROUTE: Add the path for the Complaint Generator */}
+              <Route path="complaint-generator" element={<ComplaintGenerator />} />
                 <Route path="profile" element={<Profile />} />
             </Route>
           </Route>
