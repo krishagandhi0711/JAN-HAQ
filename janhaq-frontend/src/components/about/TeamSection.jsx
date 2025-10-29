@@ -3,9 +3,9 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 
 // --- Team Data ---
 const team = [
-  { name: "Disha Sharma", role: "Project Lead", img: "https://randomuser.me/api/portraits/women/44.jpg" },
-  { name: "Rahul Verma", role: "Developer", img: "https://randomuser.me/api/portraits/men/32.jpg" },
-  { name: "Priya Singh", role: "Designer", img: "https://randomuser.me/api/portraits/women/65.jpg" },
+  { name: "Disha Vaghela", role: "Frontend Developer", img: "https://randomuser.me/api/portraits/women/44.jpg" },
+  { name: "Dhriti Gandhi", role: "Backend Developer", img: "https://randomuser.me/api/portraits/men/32.jpg" },
+  { name: "Krisha Gandhi", role: "Designer", img: "https://randomuser.me/api/portraits/women/65.jpg" },
 ];
 
 // --- Animation Variants ---

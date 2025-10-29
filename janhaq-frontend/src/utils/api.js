@@ -20,7 +20,7 @@ async function apiRequest(endpoint, options = {}) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "API request failed");
+    throw new Error(data.message || data.error || "API request failed");
   }
 
   return data;
@@ -279,6 +279,38 @@ export async function explainItem(title, description) {
 // --- Departments API ---
 export async function getDepartments() {
   return apiRequest("/api/departments");
+}
+
+// --- Complaint Generator APIs (NEW) ---
+
+export async function rewriteComplaint(data) {
+  console.log('API - Generating formal complaint...');
+  return apiRequest("/api/rewriteComplaint", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function submitComplaint(data) {
+  console.log('API - Submitting new complaint...');
+  return apiRequest("/api/complaints", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getComplaints() {
+  console.log('API - Fetching user complaints list...');
+  return apiRequest("/api/complaints", {
+    method: "GET",
+  });
+}
+
+export async function getComplaintDetails(id) {
+  console.log('API - Fetching single complaint details:', id);
+  return apiRequest(`/api/complaints/${id}`, {
+    method: "GET",
+  });
 }
 
 // --- Saved Items API ---

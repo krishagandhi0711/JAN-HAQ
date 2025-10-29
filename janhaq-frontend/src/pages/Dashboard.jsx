@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { getRecommendations, updateUserProfile } from '../utils/api';
 import { Link } from 'react-router-dom';
 import OnboardingForm from '../components/OnboardingForm';
-import { BookOpen, FileText, Settings, TrendingUp, Sparkles, CheckCircle, XCircle } from 'lucide-react';
+import { BookOpen, FileText, Settings, TrendingUp, Sparkles, CheckCircle, XCircle, Zap } from 'lucide-react'; // <-- Zap is new here
 
 export default function Dashboard() {
   const { user, updateProfile } = useAuth();
@@ -334,13 +334,26 @@ export default function Dashboard() {
         {/* Quick Access Tools */}
         <section>
           <h2 className="text-2xl font-bold mb-6">Quick Access</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
+            
+            {/* NEW: File a Complaint Card */}
+            <Link to="/complaint-generator">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer border border-blue-200 dark:border-blue-800">
+                <Zap className="w-8 h-8 text-orange-600 dark:text-orange-400 mb-3" />
+                <h3 className="text-lg font-bold mb-2">📝 File a Complaint</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Generate and submit a formal complaint using AI assistance.
+                </p>
+              </div>
+            </Link>
+
+            {/* Existing Cards */}
             <Link to="/my-complaints">
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700">
                 <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-3" />
                 <h3 className="text-lg font-bold mb-2">My Complaints</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  View and track your complaints
+                  View and track your submitted complaints.
                 </p>
               </div>
             </Link>
@@ -350,7 +363,7 @@ export default function Dashboard() {
                 <BookOpen className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-3" />
                 <h3 className="text-lg font-bold mb-2">Saved Items</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Access saved laws and schemes
+                  Access saved laws and schemes.
                 </p>
               </div>
             </Link>
@@ -360,10 +373,11 @@ export default function Dashboard() {
                 <Settings className="w-8 h-8 text-green-600 dark:text-green-400 mb-3" />
                 <h3 className="text-lg font-bold mb-2">Profile Settings</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Update your information
+                  Update your information.
                 </p>
               </div>
             </Link>
+            
           </div>
         </section>
       </section>
