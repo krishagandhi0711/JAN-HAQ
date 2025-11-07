@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom"; // Added useNavigate
 import { searchProblem, explainItem, saveItem, unsaveItem, checkIfSaved } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import { marked } from "marked";
-import { Bookmark } from "lucide-react";
+import { Bookmark, ChevronLeft } from "lucide-react"; // Added ChevronLeft
 import LoginPromptModal from "../components/LoginPromptModal";
 
 export default function ProblemSolver() {
   const { isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate(); // Added navigate hook
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -126,6 +127,16 @@ export default function ProblemSolver() {
 
       {/* Top and bottom spacing + inner padding */}
       <div className="mt-[-100px] mb-[-140px] pt-24 pb-24 px-4 sm:px-6 lg:px-16">
+
+        {/* --- ADDED BACK BUTTON --- */}
+        <button 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-6 font-medium"
+        >
+            <ChevronLeft className="w-5 h-5 mr-1" />
+            Back to Dashboard
+        </button>
+        {/* --- END OF ADDED BUTTON --- */}
 
         {/* Page Header */}
         <div className="text-center mb-12">

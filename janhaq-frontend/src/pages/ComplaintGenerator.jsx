@@ -8,12 +8,16 @@ const ComplaintGenerator = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const [departments, setDepartments] = useState([]);
+    // --- State to hold all departments and unique cities ---
+    const [allDepartments, setAllDepartments] = useState([]);
+    const [uniqueCities, setUniqueCities] = useState([]);
+
     const [formData, setFormData] = useState({
         fullName: user?.name || '',
         email: user?.email || '',
         phone: '',
         area: '',
+        city: '', 
         department: '',
         originalText: '',
     });
@@ -24,29 +28,86 @@ const ComplaintGenerator = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
 
-    // Fetch departments on load
+    // --- FIX 1: Check for authentication on load ---
     useEffect(() => {
-        const fetchDepts = async () => {
-            try {
-                const depts = await getDepartments();
-                setDepartments(depts);
-                // Set first department as default if list is not empty
-                if (depts.length > 0) {
-                    setFormData(prev => ({ ...prev, department: depts[0].name }));
+        if (!user) {
+            setError("Authentication required. Please log in to file a complaint.");
+            
+            const timer = setTimeout(() => {
+                navigate('/login', { state: { from: '/complaint-generator' } });
+            }, 2000); 
+
+            return () => clearTimeout(timer);
+        }
+    }, [user, navigate]);
+    // --- END OF FIX 1 ---
+
+
+    // Fetch all departments and extract unique cities on load
+    useEffect(() => {
+        // Only fetch if the user is authenticated
+        if (user) {
+            const fetchDeptsAndCities = async () => {
+                try {
+                    const depts = await getDepartments(); // Raw list from API
+                    setAllDepartments(depts);
+                    
+                    const citySet = new Set(depts.map(dept => dept.city).filter(Boolean));
+                    setUniqueCities(Array.from(citySet));
+
+                } catch (err) {
+                    console.error("Error fetching data:", err);
+                    setError('Failed to load departments and cities. Please try refreshing.');
                 }
-            } catch (err) {
-                console.error("Error fetching departments:", err);
-                setError('Failed to load departments. Please try refreshing.');
+            };
+            fetchDeptsAndCities();
+        }
+    }, [user]); // Add user as a dependency
+    
+    // Fill user data when user object is available
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                fullName: prev.fullName || user.name || '',
+                email: prev.email || user.email || '',
+            }));
+        }
+    }, [user]);
+
+    // Get available, unique departments based on selected city
+    const availableDepartments = useMemo(() => {
+        if (!formData.city) {
+            return []; 
+        }
+        
+        const citySpecificDepts = allDepartments.filter(dept => dept.city === formData.city);
+
+        const uniqueDeptsMap = new Map();
+        citySpecificDepts.forEach(dept => {
+            if (dept && dept.name && !uniqueDeptsMap.has(dept.name)) {
+                uniqueDeptsMap.set(dept.name, dept);
             }
-        };
-        fetchDepts();
-    }, []);
+        });
+        return Array.from(uniqueDeptsMap.values());
+
+    }, [formData.city, allDepartments]);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear formal complaint if original text changes
-        if (name === 'originalText' && formalComplaint) {
+        
+        if (name === 'city') {
+            setFormData(prev => ({
+                ...prev,
+                city: value,
+                department: '' // Reset department
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+
+        if ((name === 'originalText' || name === 'department' || name === 'city') && formalComplaint) {
             setFormalComplaint(null);
             setError(null);
         }
@@ -57,8 +118,8 @@ const ComplaintGenerator = () => {
         setError(null);
         setFormalComplaint(null);
 
-        if (!formData.department || !formData.originalText || !formData.fullName || !formData.area) {
-            return setError('Please fill in Department, Full Name, Area/Locality, and Complaint Description.');
+        if (!formData.department || !formData.originalText || !formData.fullName || !formData.area || !formData.phone || !formData.city) {
+            return setError('Please fill in all required fields: Full Name, Email, Phone, City, Area/Locality, Department, and Complaint Description.');
         }
 
         setGenerating(true);
@@ -67,7 +128,8 @@ const ComplaintGenerator = () => {
                 department: formData.department,
                 description: formData.originalText,
                 name: formData.fullName,
-                area: formData.area
+                area: formData.area,
+                city: formData.city, 
             };
             const result = await rewriteComplaint(data);
             setFormalComplaint(result);
@@ -77,10 +139,19 @@ const ComplaintGenerator = () => {
             setGenerating(false);
         }
     };
+    
 
     const handleSubmitComplaint = async () => {
         if (!formalComplaint) {
             return setError('Please generate the formal complaint first.');
+        }
+        
+        const selectedDepartment = allDepartments.find(
+            d => d.name === formData.department && d.city === formData.city
+        );
+
+        if (!selectedDepartment) {
+            return setError('Could not find department details. Please re-select the city and department.');
         }
         
         setLoading(true);
@@ -94,7 +165,12 @@ const ComplaintGenerator = () => {
             email: formData.email,
             phone: formData.phone,
             area: formData.area,
-            department: formData.department,
+            city: formData.city, 
+            departmentId: selectedDepartment._id, 
+            departmentName: selectedDepartment.name,
+            // --- FIX 2: Add the 'department' field the backend is asking for ---
+            department: selectedDepartment.name, 
+            // --- END OF FIX 2 ---
             originalText: formData.originalText,
             formalText: fullEmailText,
         };
@@ -110,7 +186,7 @@ const ComplaintGenerator = () => {
                 originalText: '',
             }));
 
-            // Auto-navigate after a short delay (This is the required line)
+            // Auto-navigate after a short delay
             setTimeout(() => {
                 navigate('/my-complaints');
             }, 3000);
@@ -122,10 +198,6 @@ const ComplaintGenerator = () => {
         }
     };
     
-    const selectedDepartment = useMemo(() => 
-        departments.find(d => d.name === formData.department), 
-        [departments, formData.department]
-    );
 
     const generateFullEmailText = (bodyText, subject) => {
         const today = new Date().toLocaleDateString('en-IN', {
@@ -135,7 +207,7 @@ const ComplaintGenerator = () => {
         });
 
         // Structure the final email text for saving to DB and preview
-        return `To: The ${formData.department} Department
+        return `To: The ${formData.department} Department, ${formData.city}
 Subject: ${subject}
 
 Dear Sir/Madam,
@@ -145,8 +217,8 @@ ${bodyText}
 Sincerely,
 ${formData.fullName}
 Contact Email: ${formData.email}
-Contact Phone: ${formData.phone || 'N/A'}
-Locality: ${formData.area}
+Contact Phone: ${formData.phone}
+Locality: ${formData.area}, ${formData.city} 
 Date: ${today}`;
     };
 
@@ -154,6 +226,28 @@ Date: ${today}`;
     const previewText = formalComplaint 
         ? generateFullEmailText(formalComplaint.formalText, formalComplaint.formalSubject)
         : null;
+
+    // --- FIX 1 (Continued): Add a loading/redirecting state ---
+    if (!user) {
+        return (
+            <div className="bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
+                <div className="max-w-7xl mx-auto py-12 px-6 text-center">
+                    <Loader className="w-10 h-10 mx-auto animate-spin mb-4 text-blue-600" />
+                    <h1 className="text-2xl font-bold">Authentication Required</h1>
+                    {error && (
+                         <div className="mt-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 flex items-center gap-3 max-w-md mx-auto">
+                            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                            <p className="font-medium">Error: {error}</p>
+                        </div>
+                    )}
+                    <p className="text-lg mt-4 text-gray-600 dark:text-gray-400">
+                        Redirecting to login page...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+    // --- END OF FIX 1 ---
 
     return (
         <div className="bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -210,8 +304,9 @@ Date: ${today}`;
                                         onChange={handleChange}
                                         required
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
-                                        disabled={!!user} // Disable if user is logged in and prefilled
+                                        disabled={!!user?.name}
                                     />
+                                routes/authRoutes.js
                                 </div>
                                 <div>
                                     <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
@@ -223,40 +318,63 @@ Date: ${today}`;
                                         onChange={handleChange}
                                         required
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
-                                        disabled={!!user} // Disable if user is logged in and prefilled
+                                        disabled={!!user?.email}
                                     />
                                 </div>
                             </div>
                             
-                            {/* Phone Number & Area/Locality */}
+                            {/* Phone Number & City */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="phone" className="block text-sm font-medium mb-1">Phone Number (Optional)</label>
+                                    <label htmlFor="phone" className="block text-sm font-medium mb-1">Phone Number</label>
                                     <input
                                         type="tel"
                                         id="phone"
                                         name="phone"
                                         value={formData.phone}
                                         onChange={handleChange}
+                                        required 
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="area" className="block text-sm font-medium mb-1">Area / Locality</label>
-                                    <input
-                                        type="text"
-                                        id="area"
-                                        name="area"
-                                        value={formData.area}
+                                    <label htmlFor="city" className="block text-sm font-medium mb-1">City</label>
+                                    <select
+                                        id="city"
+                                        name="city"
+                                        value={formData.city}
                                         onChange={handleChange}
                                         required
-                                        placeholder="e.g., Sector 10, Ramnagar"
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
-                                    />
+                                        disabled={uniqueCities.length === 0}
+                                    >
+                                        <option value="">Select a city</option>
+                                        {uniqueCities.length === 0 ? (
+                                            <option value="" disabled>Loading cities...</option>
+                                        ) : (
+                                            uniqueCities.map(city => (
+                                                <option key={city} value={city}>{city}</option>
+                                            ))
+                                        )}
+                                    </select>
                                 </div>
                             </div>
 
-                            {/* Select Department */}
+                            {/* Area/Locality */}
+                            <div>
+                                <label htmlFor="area" className="block text-sm font-medium mb-1">Area / Locality</label>
+                                <input
+                                    type="text"
+                                    id="area"
+                                    name="area"
+                                    value={formData.area}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="e.g., Sector 10, Ramnagar"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+
                             <div>
                                 <label htmlFor="department" className="block text-sm font-medium mb-1">Select Department</label>
                                 <select
@@ -266,15 +384,14 @@ Date: ${today}`;
                                     onChange={handleChange}
                                     required
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
-                                    disabled={departments.length === 0}
+                                    disabled={!formData.city} // Disable if no city is selected
                                 >
-                                    {departments.length === 0 ? (
-                                        <option value="">Loading departments...</option>
-                                    ) : (
-                                        departments.map(dept => (
-                                            <option key={dept.name} value={dept.name}>{dept.name}</option>
-                                        ))
-                                    )}
+                                    <option value="">
+                                        {!formData.city ? "Select a city first" : "Select a department"}
+                                    </option>
+                                    {availableDepartments.map(dept => (
+                                        <option key={dept._id} value={dept.name}>{dept.name}</option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -295,7 +412,7 @@ Date: ${today}`;
 
                             <button
                                 type="submit"
-                                disabled={generating || loading || !formData.department || !formData.originalText || !formData.fullName || !formData.area}
+                                disabled={generating || loading || !formData.department || !formData.originalText || !formData.fullName || !formData.area || !formData.phone || !formData.city}
                                 className="w-full flex justify-center items-center px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-150 disabled:bg-blue-400 dark:disabled:bg-blue-800 disabled:cursor-not-allowed"
                             >
                                 {generating ? (

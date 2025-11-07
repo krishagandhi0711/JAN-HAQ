@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getSavedItems, unsaveItem } from "../utils/api";
 import SavedItemCard from "../components/SavedItemCard";
-import { Bookmark, Sparkles, BookOpen, FileText } from "lucide-react";
+import { Bookmark, Sparkles, BookOpen, FileText, ChevronLeft } from "lucide-react"; // Added ChevronLeft
+import { useNavigate } from "react-router-dom"; // Added useNavigate
 
 export default function SavedLaws() {
   const { user } = useAuth();
+  const navigate = useNavigate(); // Added navigate hook
   const [savedItems, setSavedItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // 'all', 'law', 'scheme'
@@ -58,6 +60,17 @@ export default function SavedLaws() {
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
       <div className="max-w-7xl mx-auto py-16 px-6">
+
+        {/* --- ADDED BACK BUTTON --- */}
+        <button 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-6 font-medium"
+        >
+            <ChevronLeft className="w-5 h-5 mr-1" />
+            Back to Dashboard
+        </button>
+        {/* --- END OF ADDED BUTTON --- */}
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">

@@ -3,7 +3,134 @@ import { useAuth } from '../context/AuthContext';
 import { getRecommendations, updateUserProfile } from '../utils/api';
 import { Link } from 'react-router-dom';
 import OnboardingForm from '../components/OnboardingForm';
-import { BookOpen, FileText, Settings, TrendingUp, Sparkles, CheckCircle, XCircle, Zap } from 'lucide-react'; // <-- Zap is new here
+// Updated imports to include all necessary icons
+import { BookOpen, FileText, Settings, TrendingUp, Sparkles, CheckCircle, XCircle, Zap, UserCheck, ClipboardList } from 'lucide-react'; 
+
+// 1. Quick Access Items Data - NOW INCLUDES PROFILE SETTINGS
+// Define the data for the Quick Access cards to be mapped over
+const quickAccessItems = [
+  {
+    title: "AI Problem Solver",
+    icon: Zap,
+    to: "/problem-solver",
+    description: "Get instant legal and scheme advice from the AI assistant.",
+    color: "orange",
+  },
+  {
+    title: "File a Complaint",
+    icon: FileText,
+    to: "/complaint-generator",
+    description: "Generate and submit a formal complaint using AI assistance.",
+    color: "blue",
+  },
+  {
+    title: "My Complaints",
+    icon: ClipboardList, 
+    to: "/my-complaints",
+    description: "View and track your submitted complaints status and history.",
+    color: "purple",
+  },
+  {
+    title: "Saved Items",
+    icon: BookOpen,
+    to: "/saved-laws",
+    description: "Access your bookmarked laws and schemes quickly and easily.",
+    color: "green",
+  },
+  {
+    // RE-ADDED PROFILE SETTINGS CARD
+    title: "Profile Settings",
+    icon: Settings,
+    to: "/profile",
+    description: "Update your personal details, password, and preferences.",
+    color: "red", // Using a distinct color
+  },
+];
+
+// 2. Quick Access Card Component for consistent styling and equal size
+const QuickAccessCard = ({ title, icon: Icon, to, description, color }) => {
+    const colorMap = {
+      blue: "text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+      purple: "text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800",
+      orange: "text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+      green: "text-green-600 dark:text-green-400 border-green-200 dark:border-green-800",
+      // New color for Profile Settings
+      red: "text-red-600 dark:text-red-400 border-red-200 dark:border-red-800", 
+    };
+  
+    // h-full is critical for equal height in the auto-rows-fr grid container
+    return (
+      <Link 
+        to={to} 
+        className="h-full group focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-700 rounded-xl" // Added focus styles for accessibility
+      > 
+          {/* flex flex-col h-full and flex-1 on description ensure vertical alignment and clean look */}
+          <div className={`flex flex-col h-full bg-white dark:bg-gray-800 rounded-xl p-6 transition-shadow border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-blue-500`}>
+              <Icon className={`w-8 h-8 ${colorMap[color].split(' ')[0]} mb-3 transition-colors group-hover:opacity-90`} /> 
+              
+              <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {title}
+              </h3>
+              
+              {/* flex-1 ensures the card content fills the height and makes the whole card clickable area effective */}
+              <p className="text-sm text-gray-600 dark:text-gray-400 flex-1">
+                  {description}
+              </p>
+              {/* REMOVED: The distracting "Go to..." text link/button */}
+          </div>
+      </Link>
+    );
+};
+
+
+// The original RecommendationCard component is retained for function definition
+const RecommendationCard = ({ item }) => (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200 dark:border-gray-700">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-yellow-500" />
+          {item.score && (
+            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full">
+              {item.score} relevance
+            </span>
+          )}
+        </div>
+      </div>
+
+      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+        {item.title}
+      </h3>
+
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+        {item.description || item.summary || 'No description available'}
+      </p>
+
+      {item.tags && item.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {item.tags.slice(0, 3).map((tag, idx) => (
+            <span
+              key={idx}
+              className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {item.referenceLink && (
+        <a 
+          href={item.referenceLink} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+        >
+          Learn More →
+        </a>
+      )}
+    </div>
+  );
+
 
 export default function Dashboard() {
   const { user, updateProfile } = useAuth();
@@ -74,7 +201,8 @@ export default function Dashboard() {
       setLoading(true);
       try {
         console.log('Dashboard - Fetching recommendations for profile:', user.profile);
-        const recommendedItems = await getRecommendations(user.profile);
+        // Assuming getRecommendations takes profile and returns an array of items
+        const recommendedItems = await getRecommendations(user.profile); 
         console.log('Dashboard - Received recommendations:', recommendedItems?.length || 0);
         setRecommendations(recommendedItems || []);
       } catch (err) {
@@ -156,55 +284,7 @@ export default function Dashboard() {
     setIsEditMode(false);
     setFeedback(null);
   };
-
-  // Render recommendation card
-  const RecommendationCard = ({ item }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200 dark:border-gray-700">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-yellow-500" />
-          {item.score && (
-            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full">
-              {item.score} relevance
-            </span>
-          )}
-        </div>
-      </div>
-
-      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
-        {item.title}
-      </h3>
-
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-        {item.description || item.summary || 'No description available'}
-      </p>
-
-      {item.tags && item.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {item.tags.slice(0, 3).map((tag, idx) => (
-            <span
-              key={idx}
-              className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {item.referenceLink && (
-        <a 
-          href={item.referenceLink} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold"
-        >
-          Learn More →
-        </a>
-      )}
-    </div>
-  );
-
+  
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Onboarding Modal - Show for incomplete profiles or when editing */}
@@ -285,7 +365,18 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Recommended Section - Only show if profile is complete */}
+        {/* 3. Quick Access Section (FIRST) */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-6">Quick Access Tools</h2>
+          {/* Using a grid to hold 5 items: lg:grid-cols-5. auto-rows-fr ensures equal height. */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 auto-rows-fr">
+            {quickAccessItems.map((item, index) => (
+              <QuickAccessCard key={index} {...item} />
+            ))}
+          </div>
+        </section>
+        
+        {/* 4. Recommended Section (SECOND) - Only show if profile is complete */}
         {isProfileComplete(user) ? (
           <section className="mb-16">
             <div className="flex items-center gap-2 mb-6">
@@ -313,7 +404,7 @@ export default function Dashboard() {
             )}
           </section>
         ) : (
-          // Profile Incomplete - Prompt to complete
+          // Profile Incomplete - Prompt to complete (This is now below Quick Access)
           <section className="mb-16">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
               <Sparkles className="w-12 h-12 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
@@ -330,56 +421,6 @@ export default function Dashboard() {
             </div>
           </section>
         )}
-
-        {/* Quick Access Tools */}
-        <section>
-          <h2 className="text-2xl font-bold mb-6">Quick Access</h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            
-            {/* NEW: File a Complaint Card */}
-            <Link to="/complaint-generator">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer border border-blue-200 dark:border-blue-800">
-                <Zap className="w-8 h-8 text-orange-600 dark:text-orange-400 mb-3" />
-                <h3 className="text-lg font-bold mb-2">📝 File a Complaint</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Generate and submit a formal complaint using AI assistance.
-                </p>
-              </div>
-            </Link>
-
-            {/* Existing Cards */}
-            <Link to="/my-complaints">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700">
-                <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-3" />
-                <h3 className="text-lg font-bold mb-2">My Complaints</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  View and track your submitted complaints.
-                </p>
-              </div>
-            </Link>
-
-            <Link to="/saved-laws">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700">
-                <BookOpen className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-3" />
-                <h3 className="text-lg font-bold mb-2">Saved Items</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Access saved laws and schemes.
-                </p>
-              </div>
-            </Link>
-
-            <Link to="/profile">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700">
-                <Settings className="w-8 h-8 text-green-600 dark:text-green-400 mb-3" />
-                <h3 className="text-lg font-bold mb-2">Profile Settings</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Update your information.
-                </p>
-              </div>
-            </Link>
-            
-          </div>
-        </section>
       </section>
     </div>
   );

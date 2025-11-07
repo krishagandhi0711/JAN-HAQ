@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { getUserProfile, updateUserProfile, changePassword } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import OnboardingForm from "../components/OnboardingForm";
-import { UserCircle } from "lucide-react";
+import { UserCircle, ChevronLeft } from "lucide-react"; // Added ChevronLeft
+import { useNavigate } from "react-router-dom"; // Added useNavigate
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
+  const navigate = useNavigate(); // Added navigate hook
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [casteCategory, setCasteCategory] = useState("");
@@ -149,6 +151,17 @@ export default function Profile() {
   return (
     <div className="bg-gradient-to-br from-blue-100 via-purple-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen text-gray-900 dark:text-gray-100 flex flex-col">
       <div className="flex-grow max-w-2xl mx-auto py-14 px-2 sm:px-6">
+        
+        {/* --- ADDED BACK BUTTON --- */}
+        <button 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-6 font-medium"
+        >
+            <ChevronLeft className="w-5 h-5 mr-1" />
+            Back to Dashboard
+        </button>
+        {/* --- END OF ADDED BUTTON --- */}
+        
         <form onSubmit={handleSave} className="bg-white/95 dark:bg-gray-800/95 rounded-3xl p-8 shadow-2xl space-y-10 border border-blue-100 dark:border-gray-700 backdrop-blur-md">
           <div className="flex flex-col items-center mb-8">
             <div className="relative group mb-4">

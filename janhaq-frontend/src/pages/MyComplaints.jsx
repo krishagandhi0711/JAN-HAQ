@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getComplaints, getComplaintDetails } from '../utils/api';
 import Table from '../components/Table';
 import Modal from '../components/Modal';
-import { Loader, Eye } from 'lucide-react';
+import { Loader, Eye, ChevronLeft } from 'lucide-react'; // Added ChevronLeft
+import { useNavigate } from 'react-router-dom'; // Added useNavigate
 
 // Reusable Modal Component to show full complaint text
 const ComplaintDetailModal = ({ complaint, onClose }) => {
@@ -68,6 +69,7 @@ export default function MyComplaints() {
   const [error, setError] = useState(null);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const navigate = useNavigate(); // Added navigate hook
 
   useEffect(() => {
     // Remove the mockData import which is no longer used
@@ -162,6 +164,17 @@ export default function MyComplaints() {
       />
 
       <div className="flex-grow max-w-6xl mx-auto py-16 px-6 w-full">
+        
+        {/* --- ADDED BACK BUTTON --- */}
+        <button 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-6 font-medium"
+        >
+            <ChevronLeft className="w-5 h-5 mr-1" />
+            Back to Dashboard
+        </button>
+        {/* --- END OF ADDED BUTTON --- */}
+
         <h1 className="text-3xl font-bold mb-8">My Complaints</h1>
         
         {loading ? (
