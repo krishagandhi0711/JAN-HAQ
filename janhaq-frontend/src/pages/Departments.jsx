@@ -23,7 +23,7 @@ export default function Departments() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500 bg-pattern">
-      <div className="mt-32 mb-16 px-6 sm:px-8 lg:px-16">
+      <div className="pt-28 pb-8 px-6 sm:px-8 lg:px-16">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Departments & Authorities</h1>

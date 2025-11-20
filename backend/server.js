@@ -38,7 +38,10 @@ app.use((req, res, next) => {
 // ========================================
 
 const MONGO_URI = process.env.MONGO_URI;
-const client = new MongoClient(MONGO_URI);
+const client = new MongoClient(MONGO_URI, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+});
 let db, departmentsCollection, usersCollection, complaintsCollection;
 
 async function connectDB() {

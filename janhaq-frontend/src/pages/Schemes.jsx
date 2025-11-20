@@ -64,8 +64,8 @@ export default function Schemes() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500 bg-pattern">
 
-      {/* Remove top and bottom white space, add content padding */}
-      <div className="mt-[-100px] mb-[-80px] pt-24 pb-24 px-4 sm:px-6 lg:px-16">
+      {/* Proper padding for navbar */}
+      <div className="pt-28 pb-16 px-4 sm:px-6 lg:px-16">
         
         {/* Header */}
         <div className="text-center mb-12">

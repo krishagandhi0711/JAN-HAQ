@@ -1,11 +1,35 @@
 import React from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
+import { Github, Linkedin } from "lucide-react";
+
+// Import team images
+import dishaImg from "../../pages/disha_img.png";
+import dhritiImg from "../../pages/dhriti_pic.jpg";
+import krishaImg from "../../pages/krisha.jpg";
 
 // --- Team Data ---
 const team = [
-  { name: "Disha Vaghela", role: "Frontend Developer", img: "https://randomuser.me/api/portraits/women/44.jpg" },
-  { name: "Dhriti Gandhi", role: "Backend Developer", img: "https://randomuser.me/api/portraits/men/32.jpg" },
-  { name: "Krisha Gandhi", role: "Designer", img: "https://randomuser.me/api/portraits/women/65.jpg" },
+  { 
+    name: "Krisha Gandhi", 
+    role: "Developer", 
+    img: krishaImg,
+    github: "https://github.com/krishagandhi0711",
+    linkedin: "https://www.linkedin.com/in/krisha-gandhi-2a35972aa"
+  },
+  { 
+    name: "Dhriti Gandhi", 
+    role: "Backend Developer", 
+    img: dhritiImg,
+    github: "https://github.com/Dhriti-5",
+    linkedin: "http://www.linkedin.com/in/dhriti-gandhi-0758372b5"
+  },
+  { 
+    name: "Disha Vaghela", 
+    role: "Frontend Developer", 
+    img: dishaImg,
+    github: "https://github.com/DishaVaghela906",
+    linkedin: "https://www.linkedin.com/in/disha-vaghela-084013323"
+  },
 ];
 
 // --- Animation Variants ---
@@ -73,7 +97,29 @@ function TeamCard({ member }) {
       <h3 id={`${member.name.replace(" ", "-")}-name`} className="text-2xl font-semibold mb-1 text-gray-900 dark:text-gray-100 select-none">
         {member.name}
       </h3>
-      <p className="text-sky-600 dark:text-sky-400 font-medium tracking-wide text-lg select-none">{member.role}</p>
+      <p className="text-sky-600 dark:text-sky-400 font-medium tracking-wide text-lg mb-4 select-none">{member.role}</p>
+      
+      {/* Social Links */}
+      <div className="flex gap-4 mt-2">
+        <a
+          href={member.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-700 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+          aria-label={`${member.name}'s GitHub`}
+        >
+          <Github className="w-6 h-6" />
+        </a>
+        <a
+          href={member.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          aria-label={`${member.name}'s LinkedIn`}
+        >
+          <Linkedin className="w-6 h-6" />
+        </a>
+      </div>
     </motion.div>
   );
 }

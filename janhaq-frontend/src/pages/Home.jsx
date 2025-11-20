@@ -35,7 +35,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative overflow-hidden min-h-screen -mt-24 mb-[-130px]">
+    <div className="relative overflow-hidden min-h-screen mb-[-130px]">
       {/* Animated Gradient Background */}
       <motion.div
         className="absolute inset-0 -z-10 w-full h-full"
@@ -43,7 +43,7 @@ export default function Home() {
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       />
 
-      <div className="home-container relative transition-colors duration-500">
+      <div className="home-container relative transition-colors duration-500 pt-28">
         {/* Hero Section */}
         <HeroSection />
 

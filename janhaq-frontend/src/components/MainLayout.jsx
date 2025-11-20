@@ -10,7 +10,7 @@ export default function MainLayout() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       {/* The 'Outlet' is a placeholder from React Router where the actual page component will be rendered */}
-      <main className="flex-grow pt-20">
+      <main className="flex-grow">
         <Outlet />
       </main>
       <Footer />

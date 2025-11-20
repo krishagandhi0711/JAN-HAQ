@@ -125,8 +125,8 @@ export default function ProblemSolver() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500 bg-pattern">
 
-      {/* Top and bottom spacing + inner padding */}
-      <div className="mt-[-100px] mb-[-140px] pt-24 pb-24 px-4 sm:px-6 lg:px-16">
+      {/* Proper padding for navbar */}
+      <div className="pt-28 pb-16 px-4 sm:px-6 lg:px-16">
 
         {/* --- ADDED BACK BUTTON --- */}
         <button 

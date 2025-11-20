@@ -298,7 +298,7 @@ export default function Dashboard() {
         />
       )}
 
-      <section className="max-w-7xl mx-auto py-12 px-6">
+      <section className="max-w-7xl mx-auto pt-28 pb-8 px-6">
         {/* Feedback Message */}
         {feedback && (
           <div className={`mb-6 p-4 rounded-lg border flex items-center gap-3 ${

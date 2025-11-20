@@ -35,8 +35,8 @@ export default function Laws() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500 bg-pattern">
 
-      {/* Remove top and bottom white space and add content padding */}
-      <div className="mt-[-100px] mb-[-80px] pt-24 pb-24">
+      {/* Proper padding for navbar */}
+      <div className="pt-28 pb-16">
         <div className="text-center mb-6 px-4">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Laws & Regulations</h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
